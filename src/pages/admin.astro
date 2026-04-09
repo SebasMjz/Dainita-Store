@@ -275,12 +275,11 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
         <div class="form-group">
-          <label for="form-desc">Descripción <span class="req">*</span></label>
+          <label for="form-desc">Descripción</label>
           <textarea
             id="form-desc"
             rows="3"
-            placeholder="Descripción breve del producto..."
-            required></textarea>
+            placeholder="Descripción breve del producto..."></textarea>
         </div>
         <div class="form-group">
           <label for="form-image-file">Imágenes del producto</label>
@@ -691,7 +690,7 @@ import Layout from "../layouts/Layout.astro";
               <span class="prod-cat" style="color: ${catColor}">${p.category}</span>
             </td>
             <td class="td-price">
-              <span class="prod-price">$${p.price.toLocaleString("es-AR")}</span>
+              <span class="prod-price">Bs ${p.price.toLocaleString("es-BO")}</span>
             </td>
             <td class="td-status">
               <span class="prod-stock ${p.available ? "avail" : "unavail"}">${p.available ? "Disponible" : "Sin stock"}</span>
@@ -848,7 +847,7 @@ import Layout from "../layouts/Layout.astro";
     const available = document.getElementById("form-available").checked;
     const errEl = document.getElementById("form-error");
 
-    if (!name || !category || isNaN(price) || price < 0 || !description) {
+    if (!name || !category || isNaN(price) || price < 0) {
       errEl.textContent = "Completá los campos obligatorios correctamente.";
       errEl.style.display = "block";
       return;

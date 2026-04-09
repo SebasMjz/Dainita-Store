@@ -100,7 +100,7 @@ const WHATSAPP_NUMBER = '+59167423708';
   }
 
   function buildWhatsAppUrl(product) {
-    const msg = encodeURIComponent(`Hola! Me interesa el producto: *${product.name}* — $${product.price}. ¿Está disponible?`);
+    const msg = encodeURIComponent(`Hola! Me interesa el producto: *${product.name}* — Bs ${product.price}. ¿Está disponible?`);
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
   }
 
@@ -120,7 +120,7 @@ const WHATSAPP_NUMBER = '+59167423708';
     nameEl.textContent = product.name;
     catEl.textContent = product.category;
     descEl.textContent = product.description;
-    priceEl.textContent = `$${product.price.toLocaleString('es-AR')}`;
+    priceEl.textContent = `Bs ${product.price.toLocaleString('es-BO')}`;
     stockEl.textContent = product.available ? 'Disponible' : 'Sin stock';
     stockEl.className = 'stock-label ' + (product.available ? 'avail' : 'unavail');
 
@@ -181,7 +181,7 @@ const WHATSAPP_NUMBER = '+59167423708';
             <h3 class="card-name">${p.name}</h3>
             <p class="card-desc">${p.description}</p>
             <div class="card-footer">
-              <span class="card-price">$${p.price.toLocaleString('es-AR')}</span>
+              <span class="card-price">Bs ${p.price.toLocaleString('es-BO')}</span>
             </div>
           </div>
           <button class="card-add-btn">VER DETALLE</button>
