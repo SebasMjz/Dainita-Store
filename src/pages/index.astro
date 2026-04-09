@@ -1,17 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const WHATSAPP_NUMBER = '5491112345678';
+const WHATSAPP_NUMBER = '+59167423708';
 ---
 
-<Layout title="DainitaStore — Tu tienda de todo">
+<Layout title="Dada Store — Tu tienda de todo">
   <header class="site-header">
     <div class="container header-inner">
       <a href="/" class="logo">
         <span class="logo-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
         </span>
-        DainitaStore
+        Dada Store
       </a>
       <nav class="header-nav">
         <a href="/admin" class="admin-link">Panel Admin</a>
@@ -80,7 +80,7 @@ const WHATSAPP_NUMBER = '5491112345678';
 
   <footer class="site-footer">
     <div class="container">
-      <p>TiendaMix &copy; {new Date().getFullYear()} &mdash; Todos los derechos reservados</p>
+      <p>Dada Store &copy; {new Date().getFullYear()} &mdash; Todos los derechos reservados</p>
     </div>
   </footer>
  </Layout>
@@ -180,7 +180,6 @@ const WHATSAPP_NUMBER = '5491112345678';
             <span class="card-category" style="color: var(--card-color); font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">${p.category}</span>
             <h3 class="card-name">${p.name}</h3>
             <p class="card-desc">${p.description}</p>
-            <div class="card-stars">★★★★☆</div>
             <div class="card-footer">
               <span class="card-price">$${p.price.toLocaleString('es-AR')}</span>
             </div>
@@ -254,7 +253,12 @@ const WHATSAPP_NUMBER = '5491112345678';
         price: p.price,
         description: p.description,
         available: p.available,
-        image: p.image,
+        images: Array.isArray(p.images) && p.images.length
+          ? p.images
+          : p.image
+          ? [p.image]
+          : [],
+        image: p.image || (Array.isArray(p.images) && p.images[0]) || '',
         badge: p.badge ?? null,
       }));
 
@@ -488,8 +492,8 @@ const WHATSAPP_NUMBER = '5491112345678';
 
   .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
   }
 
 
@@ -659,16 +663,19 @@ const WHATSAPP_NUMBER = '5491112345678';
   }
 
   @media (max-width: 640px) {
-    .hero { padding: 2.5rem 0 2rem; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-    .card-body { padding: 0.75rem; }
-    .card-name { font-size: 0.9rem; }
-    .wa-btn { font-size: 0.78rem; padding: 0.55rem 0.5rem; }
+    .hero { padding: 2.25rem 0 1.75rem; }
+    .search-bar { padding: 0.6rem 1rem; box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+    .products-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+    .card-image-wrap { height: 260px; }
+    .card-body { padding: 1.2rem; }
+    .card-name { font-size: 1.15rem; }
+    .wa-btn { font-size: 0.85rem; padding: 0.65rem 1rem; }
     .product-modal-content { grid-template-columns: 1fr; }
     .product-modal-body { padding: 1rem 1.1rem 1.1rem; }
   }
 
   @media (max-width: 380px) {
     .products-grid { grid-template-columns: 1fr; }
+    .card-image-wrap { height: 220px; }
   }
 </style>

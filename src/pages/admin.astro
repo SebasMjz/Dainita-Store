@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="DainitaStore — Panel de Administración">
+<Layout title="Dada Store — Panel de Administración">
   <div id="auth-overlay" class="auth-overlay">
     <div class="auth-card">
       <div class="auth-logo">
@@ -57,7 +57,7 @@ import Layout from "../layouts/Layout.astro";
                   d="M16 10a4 4 0 0 1-8 0"></path></svg
               >
             </span>
-            DainitaStore
+            Dada Store
           </a>
           <span class="admin-badge">Admin</span>
         </div>
@@ -256,7 +256,7 @@ import Layout from "../layouts/Layout.astro";
         <div class="form-row">
           <div class="form-group">
             <label for="form-price"
-              >Precio (ARS) <span class="req">*</span></label
+              >Precio<span class="req">*</span></label
             >
             <input
               type="number"
@@ -283,20 +283,19 @@ import Layout from "../layouts/Layout.astro";
             required></textarea>
         </div>
         <div class="form-group">
-          <label for="form-image">Imagen del producto</label>
-          <input type="url" id="form-image" placeholder="Pegar URL de imagen (opcional)" />
+          <label for="form-image-file">Imágenes del producto</label>
           <input
             type="file"
             id="form-image-file"
             accept="image/*"
-            capture="environment"
+            multiple
           />
           <div
             class="image-preview-wrap"
             id="image-preview-wrap"
             style="display:none;"
           >
-            <img id="image-preview" src="" alt="Preview" />
+            <img id="image-preview" src="" alt="Preview principal" />
           </div>
         </div>
         <div class="form-group availability-toggle-group">
@@ -417,7 +416,7 @@ import Layout from "../layouts/Layout.astro";
   let adminSearchQ = "";
   let adminCatFilter = "";
   let adminAvailFilter = "";
-  let imageDataUrl = "";
+  let imageDataUrls = [];
 
   async function fetchJson(url, options) {
     const res = await fetch(url, options);
@@ -468,7 +467,12 @@ import Layout from "../layouts/Layout.astro";
       price: p.price,
       description: p.description,
       available: p.available,
-      image: p.image,
+      images: Array.isArray(p.images) && p.images.length
+        ? p.images
+        : p.image
+        ? [p.image]
+        : [],
+      image: p.image || (Array.isArray(p.images) && p.images[0]) || "",
       badge: p.badge ?? null,
       categoryId: p.categoryId,
     };
@@ -666,36 +670,68 @@ import Layout from "../layouts/Layout.astro";
     }
     emptyEl.style.display = "none";
 
-    container.innerHTML = filtered
+    const tbodyHtml = filtered
       .map((p) => {
         const catColor = getCategoryColor(p.category);
         return `
-      <article class="product-card" data-id="${p.id}" style="--card-color:${catColor}; border-color: #1a1a1a; cursor: default; flex-direction: column;">
-        <div class="card-image-wrap" style="height: 240px; position: relative;">
-          <img src="${p.image || ""}" alt="${p.name}" onerror="this.style.display='none'" style="width: 100%; height: 100%; object-fit: cover;" />
-          ${p.badge ? `<span class="badge" style="background:${badgeColor(p.badge)}">${p.badge}</span>` : ""}
-        </div>
-        <div class="card-body" style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1; gap: 0.5rem; background: #FFF9F0;">
-          <span class="card-category" style="color: var(--card-color); font-size: 0.75rem; font-weight: 800; text-transform: uppercase;">${p.category}</span>
-          <h3 class="card-name" style="font-size: 1.25rem; font-weight: 800; color: var(--text); line-height: 1.2; margin-bottom: 0.25rem;">${p.name}</h3>
-          <p class="card-desc" style="font-size: 0.85rem; color: var(--muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1;">${p.description}</p>
-          <div class="card-footer" style="padding-top: 0.5rem; justify-content: space-between; border-top: 2px dashed var(--card-color); margin-top: auto; display: flex; align-items: center;">
-            <span class="card-price" style="font-size: 1.8rem; font-weight: 900; color: var(--card-color); margin-right: 0.5rem;">$${p.price.toLocaleString("es-AR")}</span>
-            <span class="row-stock ${p.available ? "avail" : "unavail"}" style="font-size: 0.75rem; font-weight: 700; background: ${p.available ? "var(--mint)" : "#fee2e2"}; color: ${p.available ? "var(--forest)" : "var(--crimson)"}; padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid ${p.available ? "rgba(45,122,90,0.2)" : "rgba(183,28,28,0.2)"};">${p.available ? "Disponible" : "Sin stock"}</span>
-          </div>
-        </div>
-        <div style="display: flex; border-top: 2px solid transparent;">
-          <button class="action-btn edit-btn" data-id="${p.id}" title="Editar" style="flex: 1; border-radius: 0; background: var(--card-color); color: #fff; padding: 0.8rem; border: none; cursor: pointer; transition: filter 0.2s; display: flex; justify-content: center; align-items: center;" onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter='none'">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="action-btn delete-btn" data-id="${p.id}" title="Eliminar" style="flex: 1; border-radius: 0; background: var(--crimson); color: #fff; padding: 0.8rem; border: none; cursor: pointer; transition: filter 0.2s; display: flex; justify-content: center; align-items: center;" onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter='none'">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
-        </div>
-      </article>
-    `;
+          <tr>
+            <td class="td-image">
+              <div class="table-img">
+                <img src="${p.image || ""}" alt="${p.name}" onerror="this.style.display='none'" />
+              </div>
+            </td>
+            <td class="td-name">
+              <div class="prod-name-wrap">
+                <span class="prod-name">${p.name}</span>
+                ${p.badge ? `<span class="prod-badge" style="background:${badgeColor(p.badge)}">${p.badge}</span>` : ""}
+              </div>
+              <p class="prod-desc-sm" title="${p.description}">${p.description}</p>
+            </td>
+            <td class="td-category">
+              <span class="prod-cat" style="color: ${catColor}">${p.category}</span>
+            </td>
+            <td class="td-price">
+              <span class="prod-price">$${p.price.toLocaleString("es-AR")}</span>
+            </td>
+            <td class="td-status">
+              <span class="prod-stock ${p.available ? "avail" : "unavail"}">${p.available ? "Disponible" : "Sin stock"}</span>
+            </td>
+            <td class="td-actions">
+              <div class="table-actions">
+                <button class="btn-action edit-btn" data-id="${p.id}" title="Editar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> 
+                  Editar
+                </button>
+                <button class="btn-action delete-btn" data-id="${p.id}" title="Eliminar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> 
+                  Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
       })
       .join("");
+
+    container.innerHTML = `
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 80px">Foto</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Estado</th>
+              <th style="text-align: right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tbodyHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
 
     container.querySelectorAll(".edit-btn").forEach((btn) => {
       btn.addEventListener("click", () => openEditModal(btn.dataset.id));
@@ -720,13 +756,13 @@ import Layout from "../layouts/Layout.astro";
     document.getElementById("form-desc").value = product
       ? product.description
       : "";
-    const imageInput = document.getElementById("form-image");
     const fileInput = document.getElementById("form-image-file");
     if (fileInput) fileInput.value = "";
-    imageDataUrl = product && product.image ? product.image : "";
-    imageInput.value = imageDataUrl && !imageDataUrl.startsWith("http")
-      ? ""
-      : imageDataUrl || "";
+    imageDataUrls = product && product.images
+      ? [...product.images]
+      : product && product.image
+      ? [product.image]
+      : [];
     document.getElementById("form-available").checked = product
       ? product.available
       : true;
@@ -739,7 +775,7 @@ import Layout from "../layouts/Layout.astro";
       "avail-text " +
       ((product ? product.available : true) ? "avail" : "unavail");
     document.getElementById("form-error").style.display = "none";
-    updateImagePreview(imageDataUrl || imageInput.value);
+    updateImagePreview(imageDataUrls[0] || "");
     document.getElementById("modal-overlay").style.display = "flex";
     document.getElementById("form-name").focus();
   }
@@ -774,22 +810,25 @@ import Layout from "../layouts/Layout.astro";
     }
   }
 
-  document.getElementById("form-image").addEventListener("input", (e) => {
-    imageDataUrl = "";
-    updateImagePreview(e.target.value);
-  });
-
   document
     .getElementById("form-image-file")
     .addEventListener("change", (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        imageDataUrl = reader.result || "";
-        updateImagePreview(imageDataUrl);
-      };
-      reader.readAsDataURL(file);
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+
+      Promise.all(
+        files.map(
+          (file) =>
+            new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result || "");
+              reader.readAsDataURL(file);
+            }),
+        ),
+      ).then((results) => {
+        imageDataUrls = results.filter(Boolean);
+        updateImagePreview(imageDataUrls[0] || "");
+      });
     });
 
   document.getElementById("form-available").addEventListener("change", (e) => {
@@ -805,8 +844,7 @@ import Layout from "../layouts/Layout.astro";
     const price = parseFloat(document.getElementById("form-price").value);
     const badge = document.getElementById("form-badge").value || null;
     const description = document.getElementById("form-desc").value.trim();
-    const imageUrl = document.getElementById("form-image").value.trim();
-    const image = imageDataUrl || imageUrl;
+    const images = imageDataUrls.slice();
     const available = document.getElementById("form-available").checked;
     const errEl = document.getElementById("form-error");
 
@@ -831,7 +869,8 @@ import Layout from "../layouts/Layout.astro";
       price,
       badge,
       description,
-      image,
+      images,
+      image: images[0] || "",
       available,
     };
 
@@ -1065,7 +1104,7 @@ import Layout from "../layouts/Layout.astro";
   checkAuth();
 </script>
 
-<style>
+<style is:global>
   .auth-overlay,
   .modal-overlay {
     position: fixed;
@@ -1403,124 +1442,149 @@ import Layout from "../layouts/Layout.astro";
   }
 
   .products-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1rem;
+    width: 100%;
+    margin-top: 1rem;
   }
 
-  .product-row {
+  .admin-table-wrapper {
     background: var(--surface);
     border-radius: var(--radius);
-    padding: 0.85rem;
     border: 1.5px solid var(--border);
-    border-top-width: 6px;
-    border-top-color: var(--cat-color, var(--forest));
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
     box-shadow: var(--shadow);
-    transition: box-shadow 0.2s;
+    overflow-x: auto;
   }
 
-  .product-row:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-
-  .row-image {
+  .admin-table {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 700px;
+  }
+
+  .admin-table th {
+    background: var(--bg);
+    padding: 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .admin-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .admin-table tbody tr:hover {
+    background: #f9fafb;
+  }
+
+  .td-image .table-img {
+    width: 60px;
+    height: 60px;
     border-radius: 8px;
     overflow: hidden;
     background: #f0f0ec;
-    flex-shrink: 0;
+    border: 1px solid var(--border);
   }
 
-  .row-image img {
+  .td-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .row-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .row-top {
+  .prod-name-wrap {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 0.3rem;
-    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
   }
 
-  .row-name {
+  .prod-name {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--text);
   }
 
-  .row-badge {
+  .prod-badge {
     font-size: 0.65rem;
     font-weight: 700;
     color: #fff;
     padding: 0.15rem 0.45rem;
     border-radius: 4px;
-    letter-spacing: 0.04em;
   }
 
-  .row-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.3rem;
-  }
-
-  .row-cat {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--olive);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .row-price {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--crimson);
-  }
-
-  .row-stock {
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 0.18rem 0.45rem;
-    border-radius: 20px;
-  }
-
-  .row-stock.avail {
-    background: #dcfce7;
-    color: #166534;
-  }
-  .row-stock.unavail {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .row-desc {
-    font-size: 0.78rem;
+  .prod-desc-sm {
+    font-size: 0.8rem;
     color: var(--muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
+    max-width: 250px;
   }
 
-  .row-actions {
+  .prod-cat {
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .prod-price {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .prod-stock {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+  }
+  .prod-stock.avail {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .prod-stock.unavail {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .table-actions {
     display: flex;
-    gap: 0.4rem;
-    flex-shrink: 0;
-    margin-top: 0.35rem;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    border: none;
+    background: var(--bg);
+    color: var(--muted);
+  }
+
+  .btn-action.edit-btn:hover {
+    background: #e0e7ff;
+    color: #4338ca;
+  }
+  .btn-action.delete-btn:hover {
+    background: #fee2e2;
+    color: var(--crimson);
   }
   .config-list {
     list-style: none;
@@ -1534,10 +1598,27 @@ import Layout from "../layouts/Layout.astro";
   .config-row {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 0.5rem;
+    justify-content: space-between;
+    gap: 0.75rem;
     padding: 0.25rem 0;
     margin-bottom: 0.25rem;
+  }
+
+  .config-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .config-color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
   }
 
   .config-ribbon-icon {
@@ -1560,12 +1641,27 @@ import Layout from "../layouts/Layout.astro";
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--text);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   .config-actions {
     display: flex;
     gap: 0.25rem;
     flex-shrink: 0;
+  }
+
+  .config-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .config-delete,
@@ -1852,10 +1948,6 @@ import Layout from "../layouts/Layout.astro";
 
   @media (max-width: 600px) {
     .form-row {
-      grid-template-columns: 1fr;
-    }
-
-    .products-list {
       grid-template-columns: 1fr;
     }
 

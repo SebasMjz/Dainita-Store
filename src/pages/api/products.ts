@@ -45,6 +45,12 @@ export const POST: APIRoute = async ({ request }) => {
 
     const now = new Date();
 
+    const images = Array.isArray(body.images)
+      ? body.images.map((u: unknown) => String(u)).filter((u: string) => !!u)
+      : body.image
+      ? [String(body.image)]
+      : [];
+
     const doc = {
       name: String(body.name),
       categoryId: new ObjectId(body.categoryId),
@@ -52,7 +58,8 @@ export const POST: APIRoute = async ({ request }) => {
       price: Number(body.price),
       description: String(body.description ?? ''),
       available: Boolean(body.available),
-      image: body.image ? String(body.image) : undefined,
+      images,
+      image: images[0] ?? undefined,
       badge: body.badge ? String(body.badge) : null,
       createdAt: now,
       updatedAt: now,
@@ -89,7 +96,16 @@ export const PUT: APIRoute = async ({ request, url }) => {
     if (body.price !== undefined) update.price = Number(body.price);
     if (body.description !== undefined) update.description = String(body.description);
     if (body.available !== undefined) update.available = Boolean(body.available);
-    if (body.image !== undefined) update.image = body.image ? String(body.image) : undefined;
+
+    if (body.images !== undefined || body.image !== undefined) {
+      const images = Array.isArray(body.images)
+        ? body.images.map((u: unknown) => String(u)).filter((u: string) => !!u)
+        : body.image
+        ? [String(body.image)]
+        : [];
+      update.images = images;
+      update.image = images[0] ?? undefined;
+    }
     if (body.badge !== undefined) update.badge = body.badge ? String(body.badge) : null;
 
     const result = await col.findOneAndUpdate(
