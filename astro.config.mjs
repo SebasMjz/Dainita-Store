@@ -1,11 +1,11 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import vercel from '@astrojs/vercel';
+import vercel from '@astrojs/vercel/serverless';
 
 // Astro config for Vercel + MongoDB APIs
 export default defineConfig({
 	output: 'server',
-	adapter: vercel(),
+	adapter: vercel({}),
 	security: {
 		checkOrigin: false
 	}
